@@ -36,8 +36,10 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
         if (onLogin) {
           onLogin(selectedUser);
         }
-        console.log('Login - 登录完成，跳转到portal');
-        navigate('/portal');
+        // 根据用户角色跳转到对应的门户首页
+        const redirectPath = selectedUser.role === UserRole.ADMIN ? '/dashboard' : '/portal';
+        console.log('Login - 登录完成，跳转到', redirectPath);
+        navigate(redirectPath);
         setLoading(false);
       }, 500);
     }

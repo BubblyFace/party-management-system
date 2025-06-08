@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Layout, Menu, Button, Avatar, Dropdown, Typography } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
-  DashboardOutlined,
   FileTextOutlined,
   CalendarOutlined,
   BookOutlined,
@@ -44,16 +43,21 @@ const MainLayout: React.FC = () => {
   };
 
   const menuItems = [
-    {
-      key: '/portal',
-      icon: <BankOutlined />,
-      label: '门户首页',
-    },
-    {
-      key: '/dashboard',
-      icon: <DashboardOutlined />,
-      label: '工作概览',
-    },
+    // 根据用户角色显示不同的门户首页
+    ...(currentUser?.role === UserRole.ADMIN ? [
+      {
+        key: '/dashboard',
+        icon: <BankOutlined />,
+        label: '门户首页',
+      },
+    ] : [
+      {
+        key: '/portal',
+        icon: <BankOutlined />,
+        label: '门户首页',
+      },
+    ]),
+    // 管理员功能菜单
     ...(currentUser?.role === UserRole.ADMIN ? [
       {
         key: '/duty',

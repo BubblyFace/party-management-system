@@ -65,12 +65,32 @@ const LoginGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   console.log('LoginGuard - currentUser:', currentUser);
   
   if (currentUser) {
-    console.log('LoginGuard - 已登录，跳转到portal');
-    return <Navigate to="/portal" replace />;
+    const redirectPath = currentUser.role === UserRole.ADMIN ? '/dashboard' : '/portal';
+    console.log('LoginGuard - 已登录，跳转到', redirectPath);
+    return <Navigate to={redirectPath} replace />;
   }
   
   console.log('LoginGuard - 未登录，显示登录页');
   return <>{children}</>;
+};
+
+// 首页重定向组件 - 根据用户角色跳转到不同的门户首页
+const HomeRedirect: React.FC = () => {
+  const currentUser = UserStorage.getCurrentUser();
+  
+  console.log('HomeRedirect - currentUser:', currentUser);
+  
+  if (!currentUser) {
+    return <Navigate to="/login" replace />;
+  }
+  
+  if (currentUser.role === UserRole.ADMIN) {
+    console.log('HomeRedirect - 管理员，跳转到dashboard');
+    return <Navigate to="/dashboard" replace />;
+  } else {
+    console.log('HomeRedirect - 党群主管，跳转到portal');
+    return <Navigate to="/portal" replace />;
+  }
 };
 
 // 创建路由配置
@@ -98,25 +118,31 @@ export const router = createBrowserRouter([
       {
         index: true,
         element: (
-          <LazyWrapper>
-            <PortalApp />
-          </LazyWrapper>
+          <RouteGuard>
+            <LazyWrapper>
+              <HomeRedirect />
+            </LazyWrapper>
+          </RouteGuard>
         ),
       },
       {
         path: 'portal',
         element: (
-          <LazyWrapper>
-            <PortalApp />
-          </LazyWrapper>
+          <RouteGuard requireRole={UserRole.MEMBER}>
+            <LazyWrapper>
+              <PortalApp />
+            </LazyWrapper>
+          </RouteGuard>
         ),
       },
       {
         path: 'dashboard',
         element: (
-          <LazyWrapper>
-            <Dashboard />
-          </LazyWrapper>
+          <RouteGuard requireRole={UserRole.ADMIN}>
+            <LazyWrapper>
+              <Dashboard />
+            </LazyWrapper>
+          </RouteGuard>
         ),
       },
       {
