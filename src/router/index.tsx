@@ -1,6 +1,6 @@
 import React, { Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { Spin } from 'antd';
+import LoadingFallback from '../components/LoadingFallback';
 
 // 懒加载页面组件
 const MainLayout = React.lazy(() => import('../layouts/MainLayout'));
@@ -20,16 +20,7 @@ enum UserRole {
 
 // 加载组件包装器
 const LazyWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <Suspense fallback={
-    <div style={{ 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      height: '50vh' 
-    }}>
-      <Spin size="large" />
-    </div>
-  }>
+  <Suspense fallback={<LoadingFallback />}>
     {children}
   </Suspense>
 );
