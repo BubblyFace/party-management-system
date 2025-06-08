@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Card, Row, Col, Statistic, List, Tag, Progress, Typography, Badge } from 'antd';
+import { useNavigate } from 'react-router-dom';
 import { 
   CheckCircleOutlined, 
   ClockCircleOutlined, 
@@ -7,15 +8,28 @@ import {
   FileTextOutlined,
   CalendarOutlined,
   BookOutlined,
-  AuditOutlined
+  AuditOutlined,
+  AppstoreOutlined,
+  DashboardOutlined
 } from '@ant-design/icons';
 import { DutyStorage, MeetingStorage, EducationStorage, InspectionStorage, UserStorage } from '../utils/storage';
 import type { User, DutyItem, Statistics } from '../types';
 import { Status, Priority } from '../types';
 
-const { Title, Text } = Typography;
+// 导入portal页面的组件和数据
+import HeroSection from './portal/components/HeroSection';
+import ModuleContainer from './portal/components/ModuleContainer';
+import DashboardCard from './portal/components/DashboardCard';
+import { dashboardCards } from './portal/data/mockData';
+import './portal/index.css';
+
+const { Text } = Typography;
+
+// 管理员专用的功能卡片，过滤掉工作概览
+const adminFunctionCards = dashboardCards.filter(card => card.id !== 1);
 
 const Dashboard: React.FC = () => {
+  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [statistics, setStatistics] = useState<Statistics>({
     totalDutyItems: 0,
@@ -84,6 +98,13 @@ const Dashboard: React.FC = () => {
     setMyDutyItems(sortedItems.slice(0, 10)); // 只显示前10个任务
   };
 
+  const handleCardClick = (cardId: number) => {
+    const card = adminFunctionCards.find(c => c.id === cardId);
+    if (card?.path) {
+      navigate(card.path);
+    }
+  };
+
   const getStatusColor = (status: Status) => {
     switch (status) {
       case Status.COMPLETED: return 'success';
@@ -132,156 +153,190 @@ const Dashboard: React.FC = () => {
   }
 
   return (
-    <div style={{ padding: '24px', background: 'transparent', minHeight: '100%' }}>
-      <div style={{ marginBottom: 24 }}>
-        <Title level={2}>工作概览</Title>
-        <Text type="secondary">
-          欢迎您，{currentUser.name} | {currentUser.department}
-        </Text>
-      </div>
-
-      {/* 统计卡片 */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="待办履职事项"
-              value={statistics.pendingDutyItems}
-              prefix={<ClockCircleOutlined />}
-              valueStyle={{ color: '#faad14' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="已完成事项"
-              value={statistics.completedDutyItems}
-              prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: '#52c41a' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="逾期事项"
-              value={statistics.overdueDutyItems}
-              prefix={<ExclamationCircleOutlined />}
-              valueStyle={{ color: '#ff4d4f' }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card>
-            <Statistic
-              title="履职完成率"
-              value={statistics.totalDutyItems ? Math.round((statistics.completedDutyItems / statistics.totalDutyItems) * 100) : 0}
-              suffix="%"
-              prefix={<AuditOutlined />}
-              valueStyle={{ color: '#1890ff' }}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      {/* 其他统计信息 */}
-      <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
-        <Col xs={24} sm={8}>
-          <Card>
-            <Statistic
-              title="参与会议"
-              value={statistics.totalMeetings}
-              prefix={<CalendarOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={8}>
-          <Card>
-            <Statistic
-              title="教育学习"
-              value={statistics.totalEducationRecords}
-              prefix={<BookOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} sm={8}>
-          <Card>
-            <Statistic
-              title="巡视整改"
-              value={`${statistics.completedInspectionItems}/${statistics.totalInspectionItems}`}
-              prefix={<FileTextOutlined />}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      {/* 我的待办事项 */}
-      <Card 
-        title="我的履职事项" 
-        extra={
-          <Badge 
-            count={statistics.pendingDutyItems} 
-            style={{ backgroundColor: '#faad14' }}
-          />
-        }
-      >
-        <List
-          dataSource={myDutyItems}
-          renderItem={(item) => (
-            <List.Item
-              key={item.id}
-              style={{
-                background: isOverdue(item.dueDate, item.status) ? '#fff2f0' : '#fff',
-                marginBottom: 8,
-                padding: 16,
-                borderRadius: 6,
-                border: '1px solid #f0f0f0'
-              }}
+    <div className="min-h-full bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
+      <main className="relative">
+        {/* 使用portal的HeroSection */}
+        <HeroSection />
+        
+        {/* 工作概览模块 */}
+        <section className="relative z-10 -mt-16 mb-4">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <ModuleContainer
+              title="工作概览"
+              description={`欢迎您，${currentUser.name} | ${currentUser.department}`}
+              icon={<DashboardOutlined className="mr-2 text-blue-600" />}
+              badge={{ text: "管理员工作台" }}
+              compact={false}
             >
-              <List.Item.Meta
-                title={
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span>{item.title}</span>
-                    <Tag color={getPriorityColor(item.priority)}>
-                      {getPriorityText(item.priority)}优先级
-                    </Tag>
-                    <Tag color={getStatusColor(item.status)}>
-                      {getStatusText(item.status)}
-                    </Tag>
-                    {isOverdue(item.dueDate, item.status) && (
-                      <Tag color="red">已逾期</Tag>
-                    )}
-                  </div>
+              {/* 统计卡片 */}
+              <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+                <Col xs={24} sm={12} lg={6}>
+                  <Card size="small" className="border-l-4 border-l-yellow-400">
+                    <Statistic
+                      title="待办履职事项"
+                      value={statistics.pendingDutyItems}
+                      prefix={<ClockCircleOutlined />}
+                      valueStyle={{ color: '#faad14', fontSize: '20px' }}
+                    />
+                  </Card>
+                </Col>
+                <Col xs={24} sm={12} lg={6}>
+                  <Card size="small" className="border-l-4 border-l-green-400">
+                    <Statistic
+                      title="已完成事项"
+                      value={statistics.completedDutyItems}
+                      prefix={<CheckCircleOutlined />}
+                      valueStyle={{ color: '#52c41a', fontSize: '20px' }}
+                    />
+                  </Card>
+                </Col>
+                <Col xs={24} sm={12} lg={6}>
+                  <Card size="small" className="border-l-4 border-l-red-400">
+                    <Statistic
+                      title="逾期事项"
+                      value={statistics.overdueDutyItems}
+                      prefix={<ExclamationCircleOutlined />}
+                      valueStyle={{ color: '#ff4d4f', fontSize: '20px' }}
+                    />
+                  </Card>
+                </Col>
+                <Col xs={24} sm={12} lg={6}>
+                  <Card size="small" className="border-l-4 border-l-blue-400">
+                    <Statistic
+                      title="履职完成率"
+                      value={statistics.totalDutyItems ? Math.round((statistics.completedDutyItems / statistics.totalDutyItems) * 100) : 0}
+                      suffix="%"
+                      prefix={<AuditOutlined />}
+                      valueStyle={{ color: '#1890ff', fontSize: '20px' }}
+                    />
+                  </Card>
+                </Col>
+              </Row>
+
+              {/* 其他统计信息 */}
+              <Row gutter={[16, 16]} style={{ marginBottom: 24 }}>
+                <Col xs={24} sm={8}>
+                  <Card size="small" className="text-center">
+                    <Statistic
+                      title="参与会议"
+                      value={statistics.totalMeetings}
+                      prefix={<CalendarOutlined />}
+                      valueStyle={{ fontSize: '18px' }}
+                    />
+                  </Card>
+                </Col>
+                <Col xs={24} sm={8}>
+                  <Card size="small" className="text-center">
+                    <Statistic
+                      title="教育学习"
+                      value={statistics.totalEducationRecords}
+                      prefix={<BookOutlined />}
+                      valueStyle={{ fontSize: '18px' }}
+                    />
+                  </Card>
+                </Col>
+                <Col xs={24} sm={8}>
+                  <Card size="small" className="text-center">
+                    <Statistic
+                      title="巡视整改"
+                      value={`${statistics.completedInspectionItems}/${statistics.totalInspectionItems}`}
+                      prefix={<FileTextOutlined />}
+                      valueStyle={{ fontSize: '18px' }}
+                    />
+                  </Card>
+                </Col>
+              </Row>
+
+              {/* 我的待办事项 */}
+              <Card 
+                size="small"
+                title="我的履职事项" 
+                extra={
+                  <Badge 
+                    count={statistics.pendingDutyItems} 
+                    style={{ backgroundColor: '#faad14' }}
+                  />
                 }
-                description={
-                  <div>
-                    <Text type="secondary" style={{ display: 'block', marginBottom: 8 }}>
-                      {item.description}
-                    </Text>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                      <Text type="secondary">
-                        截止日期: {item.dueDate}
-                      </Text>
-                      <div style={{ flex: 1, maxWidth: 200 }}>
-                        <Text type="secondary" style={{ marginRight: 8 }}>
-                          进度:
-                        </Text>
-                        <Progress 
-                          percent={item.progress} 
-                          size="small" 
-                          status={item.progress === 100 ? 'success' : 'normal'}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                }
-              />
-            </List.Item>
-          )}
-          locale={{ emptyText: '暂无履职事项' }}
-        />
-      </Card>
+              >
+                <List
+                  dataSource={myDutyItems}
+                  renderItem={(item) => (
+                    <List.Item
+                      key={item.id}
+                      style={{
+                        background: isOverdue(item.dueDate, item.status) ? '#fff2f0' : '#fff',
+                        marginBottom: 8,
+                        padding: 12,
+                        borderRadius: 6,
+                        border: '1px solid #f0f0f0'
+                      }}
+                    >
+                      <List.Item.Meta
+                        title={
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ fontSize: '14px' }}>{item.title}</span>
+                            <Tag color={getPriorityColor(item.priority)}>
+                              {getPriorityText(item.priority)}优先级
+                            </Tag>
+                            <Tag color={getStatusColor(item.status)}>
+                              {getStatusText(item.status)}
+                            </Tag>
+                            {isOverdue(item.dueDate, item.status) && (
+                              <Tag color="red">已逾期</Tag>
+                            )}
+                          </div>
+                        }
+                        description={
+                          <div>
+                            <Text type="secondary" style={{ display: 'block', marginBottom: 8, fontSize: '12px' }}>
+                              {item.description}
+                            </Text>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                              <Text type="secondary" style={{ fontSize: '12px' }}>
+                                截止: {item.dueDate}
+                              </Text>
+                              <div style={{ flex: 1, maxWidth: 120 }}>
+                                <Progress 
+                                  percent={item.progress} 
+                                  size="small" 
+                                  status={item.progress === 100 ? 'success' : 'normal'}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        }
+                      />
+                    </List.Item>
+                  )}
+                  locale={{ emptyText: '暂无履职事项' }}
+                />
+              </Card>
+            </ModuleContainer>
+          </div>
+        </section>
+        
+        {/* 功能模块 */}
+        <section className="relative z-10 pb-8">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <ModuleContainer
+              title="功能模块"
+              description="提供完整的党建工作管理功能，助力提升工作效率"
+              icon={<AppstoreOutlined className="mr-2 text-blue-600" />}
+              badge={{ text: "智能工作台" }}
+            >
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {adminFunctionCards.map((card, index) => (
+                  <DashboardCard
+                    key={index}
+                    card={card}
+                    onClick={() => handleCardClick(card.id)}
+                  />
+                ))}
+              </div>
+            </ModuleContainer>
+          </div>
+        </section>
+      </main>
     </div>
   );
 };
