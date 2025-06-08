@@ -4,6 +4,19 @@
 
 **问题**: 部署到 Vercel 后出现白屏，无法正常显示内容
 
+### 🐛 最新发现的问题 (已修复)
+**MIME类型错误**: 
+```
+Failed to load module script: Expected a JavaScript-or-Wasm module script but the server responded with a MIME type of "text/html".
+```
+
+**原因**: `vercel.json` 的路由配置过于宽泛，将所有请求（包括静态资源）都重定向到了 `index.html`
+
+**解决方案**: 
+- ✅ 修改 `vercel.json` 使用 `rewrites` 而不是 `routes`
+- ✅ 排除 `/assets/` 目录，确保静态资源正确加载
+- ✅ 添加静态资源缓存优化
+
 ## 🔧 已实施的修复措施
 
 ### 1. 错误边界 (ErrorBoundary)
@@ -25,6 +38,7 @@
 - ✅ 更新了 `vite.config.ts`
 - ✅ 添加了构建优化配置
 - ✅ 配置了代码分割策略
+- ✅ **修复了 `vercel.json` 路由配置问题**
 
 ### 5. HTML 文件更新
 - ✅ 更新了页面标题和meta信息
@@ -37,6 +51,35 @@
 ### 测试步骤
 1. **基础功能测试** - 使用 SimpleApp 组件验证 React + Ant Design 正常工作
 2. **完整功能测试** - 恢复完整的 App 组件，包含所有业务功能
+3. **MIME类型修复** - 确保JS模块文件正确加载
+
+### 🔧 vercel.json 当前配置
+```json
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "framework": "vite",
+  "installCommand": "npm install",
+  "devCommand": "npm run dev",
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/((?!assets/|vite\\.svg|favicon\\.ico).*)",
+      "destination": "/index.html"
+    }
+  ]
+}
+```
 
 ## 🔑 测试账户
 
@@ -74,17 +117,19 @@
 
 ### 如果仍然出现白屏
 1. **检查浏览器控制台** - 查看是否有 JavaScript 错误
-2. **清除浏览器缓存** - 强制刷新页面
+2. **清除浏览器缓存** - 强制刷新页面（Ctrl+F5 或 Cmd+Shift+R）
 3. **检查网络连接** - 确认资源文件正常加载
 
 ### 调试方法
-1. 访问 `/debug` 路径（如果添加了调试路由）
-2. 查看浏览器开发者工具的 Network 选项卡
-3. 检查 Console 中的错误日志
+1. 打开浏览器开发者工具
+2. 查看 **Network** 选项卡，确认JS文件返回状态码为200
+3. 查看 **Console** 中的错误日志
+4. 检查 **Sources** 面板确认文件正确加载
 
 ## 📞 技术支持
 
 ### 常见问题解决方案
+- **MIME类型错误**: 已通过修复 `vercel.json` 解决
 - **路由404错误**: 检查 `vercel.json` 配置
 - **样式显示异常**: 确认 CSS 文件正确加载
 - **组件加载失败**: 检查代码分割和懒加载配置
@@ -97,8 +142,10 @@
 
 ---
 
-**🎯 最新状态**: 已修复白屏问题，系统应该可以正常访问
+**🎯 最新状态**: 已修复MIME类型错误，系统应该可以正常访问
 
-**⏰ 更新时间**: {new Date().toLocaleString()}
+**⏰ 更新时间**: 2024年6月8日 21:45
 
-**🔄 部署版本**: 最新 (包含错误边界和调试功能) 
+**🔄 部署版本**: v2.0 (包含错误边界、调试功能和路由修复)
+
+**✨ 预计生效时间**: Vercel自动部署完成后（约2-3分钟） 
