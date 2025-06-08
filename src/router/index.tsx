@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import { createBrowserRouter, Navigate } from 'react-router-dom';
 import LoadingFallback from '../components/LoadingFallback';
+import { UserStorage } from '../utils/storage';
 
 // 懒加载页面组件
 const MainLayout = React.lazy(() => import('../layouts/MainLayout'));
@@ -37,16 +38,38 @@ const RouteGuard: React.FC<RouteGuardProps> = ({
   requireAuth = true, 
   requireRole 
 }) => {
-  const currentUser = JSON.parse(localStorage.getItem('currentUser') || 'null');
+  const currentUser = UserStorage.getCurrentUser();
+  
+  console.log('RouteGuard - currentUser:', currentUser);
+  console.log('RouteGuard - requireAuth:', requireAuth);
+  console.log('RouteGuard - requireRole:', requireRole);
   
   if (requireAuth && !currentUser) {
+    console.log('RouteGuard - 未登录，跳转到login');
     return <Navigate to="/login" replace />;
   }
   
   if (requireRole && currentUser?.role !== requireRole) {
+    console.log('RouteGuard - 权限不足，跳转到portal');
     return <Navigate to="/portal" replace />;
   }
   
+  console.log('RouteGuard - 通过验证');
+  return <>{children}</>;
+};
+
+// 登录页面守卫 - 防止已登录用户访问登录页
+const LoginGuard: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const currentUser = UserStorage.getCurrentUser();
+  
+  console.log('LoginGuard - currentUser:', currentUser);
+  
+  if (currentUser) {
+    console.log('LoginGuard - 已登录，跳转到portal');
+    return <Navigate to="/portal" replace />;
+  }
+  
+  console.log('LoginGuard - 未登录，显示登录页');
   return <>{children}</>;
 };
 
@@ -55,9 +78,11 @@ export const router = createBrowserRouter([
   {
     path: '/login',
     element: (
-      <LazyWrapper>
-        <Login />
-      </LazyWrapper>
+      <LoginGuard>
+        <LazyWrapper>
+          <Login />
+        </LazyWrapper>
+      </LoginGuard>
     ),
   },
   {

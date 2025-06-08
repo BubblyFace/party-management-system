@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Card, Select, Button, Typography, Space } from 'antd';
 import { UserOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -22,15 +22,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const members = users.filter(user => user.role === UserRole.MEMBER);
   const admins = users.filter(user => user.role === UserRole.ADMIN);
 
-  useEffect(() => {
-    // 如果已经登录，直接跳转到portal
-    const currentUser = UserStorage.getCurrentUser();
-    console.log('===currentUser===', currentUser);
-    if (currentUser) {
-      navigate('/portal');
-    }
-  }, [navigate]);
-
   const handleLogin = () => {
     if (!selectedUserId) return;
     
@@ -38,12 +29,14 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     const selectedUser = UserStorage.getById(selectedUserId);
     
     if (selectedUser) {
+      console.log('Login - 用户登录:', selectedUser);
       // 模拟登录延迟
       setTimeout(() => {
         UserStorage.setCurrentUser(selectedUser);
         if (onLogin) {
           onLogin(selectedUser);
         }
+        console.log('Login - 登录完成，跳转到portal');
         navigate('/portal');
         setLoading(false);
       }, 500);
