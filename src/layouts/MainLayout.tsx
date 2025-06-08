@@ -57,29 +57,27 @@ const MainLayout: React.FC = () => {
         label: '门户首页',
       },
     ]),
-    // 管理员功能菜单
-    ...(currentUser?.role === UserRole.ADMIN ? [
-      {
-        key: '/duty',
-        icon: <FileTextOutlined />,
-        label: '履职事项管理',
-      },
-      {
-        key: '/meeting',
-        icon: <CalendarOutlined />,
-        label: '会议台账管理',
-      },
-      {
-        key: '/education',
-        icon: <BookOutlined />,
-        label: '教育学习管理',
-      },
-      {
-        key: '/inspection',
-        icon: <AuditOutlined />,
-        label: '巡视整改管理',
-      },
-    ] : []),
+    // 管理功能菜单 - 所有登录用户都可以访问
+    {
+      key: '/duty',
+      icon: <FileTextOutlined />,
+      label: '履职事项管理',
+    },
+    {
+      key: '/meeting',
+      icon: <CalendarOutlined />,
+      label: '会议台账管理',
+    },
+    {
+      key: '/education',
+      icon: <BookOutlined />,
+      label: '教育学习管理',
+    },
+    {
+      key: '/inspection',
+      icon: <AuditOutlined />,
+      label: '巡视整改管理',
+    },
   ];
 
   const userMenuItems = [

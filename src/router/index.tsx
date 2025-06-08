@@ -148,41 +148,33 @@ export const router = createBrowserRouter([
       {
         path: 'duty',
         element: (
-          <RouteGuard requireRole={UserRole.ADMIN}>
-            <LazyWrapper>
-              <DutyManagement />
-            </LazyWrapper>
-          </RouteGuard>
+          <LazyWrapper>
+            <DutyManagement />
+          </LazyWrapper>
         ),
       },
       {
         path: 'meeting',
         element: (
-          <RouteGuard requireRole={UserRole.ADMIN}>
-            <LazyWrapper>
-              <MeetingManagement />
-            </LazyWrapper>
-          </RouteGuard>
+          <LazyWrapper>
+            <MeetingManagement />
+          </LazyWrapper>
         ),
       },
       {
         path: 'education',
         element: (
-          <RouteGuard requireRole={UserRole.ADMIN}>
-            <LazyWrapper>
-              <EducationManagement />
-            </LazyWrapper>
-          </RouteGuard>
+          <LazyWrapper>
+            <EducationManagement />
+          </LazyWrapper>
         ),
       },
       {
         path: 'inspection',
         element: (
-          <RouteGuard requireRole={UserRole.ADMIN}>
-            <LazyWrapper>
-              <InspectionManagement />
-            </LazyWrapper>
-          </RouteGuard>
+          <LazyWrapper>
+            <InspectionManagement />
+          </LazyWrapper>
         ),
       },
     ],
