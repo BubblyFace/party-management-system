@@ -395,4 +395,67 @@ export const getOrganizationData = (): Promise<{
       });
     }, 120);
   });
+};
+
+// 党委小组成员数据
+export interface PartyMember {
+  id: number;
+  name: string;
+  position: string;
+  department: string;
+  role: 'primary' | 'secondary' | 'member';
+}
+
+export const partyCommitteeMembers: PartyMember[] = [
+  {
+    id: 1,
+    name: '张建国',
+    position: '党委书记',
+    department: '党委办公室',
+    role: 'primary'
+  },
+  {
+    id: 2,
+    name: '李慧敏',
+    position: '党委副书记',
+    department: '党委办公室',
+    role: 'secondary'
+  },
+  {
+    id: 3,
+    name: '王政强',
+    position: '纪委书记',
+    department: '纪检监察部',
+    role: 'secondary'
+  },
+  {
+    id: 4,
+    name: '陈志华',
+    position: '组织委员',
+    department: '组织部',
+    role: 'member'
+  },
+  {
+    id: 5,
+    name: '刘晓红',
+    position: '宣传委员',
+    department: '宣传部',
+    role: 'member'
+  },
+  {
+    id: 6,
+    name: '赵明辉',
+    position: '统战委员',
+    department: '统战部',
+    role: 'member'
+  }
+];
+
+// 模拟API调用 - 获取党委成员数据
+export const getPartyCommitteeMembers = (): Promise<PartyMember[]> => {
+  return new Promise((resolve) => {
+    setTimeout(() => {
+      resolve(partyCommitteeMembers);
+    }, 50);
+  });
 }; 
