@@ -182,7 +182,7 @@ party-management-system/
 
 如有问题或建议，请通过以下方式联系：
 - 项目Issues：[GitHub Issues](链接)
-- 邮箱：contact@example.com
+- 邮箱：751835145@qq.com
 
 ---
 
